@@ -34,14 +34,15 @@ public class SessionIdTrackerAkka implements SessionIdTracker {
   }
 
   @Override
-  public void save(Object data) {
-    Object[] asArray = (Object[]) data;
-    HttpResponse resp = (HttpResponse) asArray[0];
+  public Object save(Object data) {
+    HttpResponse resp = (HttpResponse) data;
     var pair = HttpCookiePair$.MODULE$.apply(cookieName, sid.get());
-    var cookie = pair.toCookie()
-      .withHttpOnly(false)
-      .withPath("/");
-    var foo = resp.addHeader(SetCookie.create(cookie));
-   asArray[0] = foo;
+    return resp.addHeader(
+      SetCookie.create(
+        pair.toCookie()
+          .withHttpOnly(false)
+          .withPath("/")
+      )
+    );
   }
 }
