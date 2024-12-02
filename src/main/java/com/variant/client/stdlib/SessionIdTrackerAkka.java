@@ -11,14 +11,12 @@ import java.util.Optional;
 import static scala.jdk.javaapi.CollectionConverters.asJava;
 
 public class SessionIdTrackerAkka implements SessionIdTracker {
-
-  private final String cookieName = "variant-ssnid";
   private Optional<String> sid = Optional.empty();
 
   public SessionIdTrackerAkka(Object data) {
     HttpRequest req = (HttpRequest) data;
     sid = asJava(req.cookies()).stream()
-      .filter(cookie -> cookieName.equals(cookie.name()))
+      .filter(cookie -> getCookieName().equals(cookie.name()))
       .findAny()
       .map(pair -> pair.value());
   }
@@ -36,7 +34,7 @@ public class SessionIdTrackerAkka implements SessionIdTracker {
   @Override
   public Object save(Object data) {
     HttpResponse resp = (HttpResponse) data;
-    var pair = HttpCookiePair$.MODULE$.apply(cookieName, sid.get());
+    var pair = HttpCookiePair$.MODULE$.apply(getCookieName(), sid.get());
     return resp.addHeader(
       SetCookie.create(
         pair.toCookie()
